@@ -40,9 +40,9 @@
 //!         // your storage change action
 //!         self.records.insert(&account_id, &message);
 //!
-//!         // end and update
+//!         // stop and update
 //!         self.storage_manager
-//!             .end_measure_and_update_account_storage_usage(&account_id);
+//!             .stop_measure_and_update_account_storage_usage(&account_id);
 //!     }
 //! }
 //! ```
