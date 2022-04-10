@@ -5,6 +5,7 @@ use crate::errors::*;
 use crate::red_packet::RedPacket;
 use crate::Contract;
 use crate::view::RedPacketView;
+use crate::saika_red_packet::SaikaRedPacket;
 
 use std::collections::HashSet;
 use near_sdk::{AccountId, env, near_bindgen, PublicKey, PromiseOrValue, require, Balance};
@@ -12,10 +13,10 @@ use near_sdk::json_types::U128;
 
 
 #[near_bindgen]
-impl Contract {
+impl SaikaRedPacket for Contract {
     /// create a near red packet
     #[payable]
-    pub fn create_near_red_packet(
+    fn create_near_red_packet(
         &mut self,
         public_key: PublicKey,
         split: usize,
@@ -34,23 +35,23 @@ impl Contract {
         );
     }
     /// claim near red Packet and fungible token red packet with private key
-    pub fn claim_red_packet(&mut self, claimer_id: AccountId) -> U128 {
+    fn claim_red_packet(&mut self, claimer_id: AccountId) -> U128 {
         self.internal_claim_red_packet(claimer_id)
     }
     /// refund balance
-    pub fn refund(&mut self, public_key: PublicKey) -> U128 {
+    fn refund(&mut self, public_key: PublicKey) -> U128 {
         self.internal_refund(public_key)
     }
     /// remove red packet run out
-    pub fn remove_history(&mut self, public_key: PublicKey) {
+    fn remove_history(&mut self, public_key: PublicKey) {
         self.internal_remove_history(public_key)
     }
     /// remove all red packet run out
-    pub fn clear_history(&mut self) {
+    fn clear_history(&mut self) {
         self.internal_clear_history();
     }
     /// view owner's red packets detail
-    pub fn get_red_packets_by_owner_id(&self, owner_id: AccountId) -> Vec<RedPacketView> {
+    fn get_red_packets_by_owner_id(&self, owner_id: AccountId) -> Vec<RedPacketView> {
         self.owners.get(&owner_id).unwrap_or(HashSet::new())
             .into_iter()
             .map(|public_key|{
@@ -64,11 +65,11 @@ impl Contract {
             .collect()
     }
     /// view owner's red packet public keys
-    pub fn get_pks_by_owner_id(&self, owner_id: AccountId) -> HashSet<PublicKey> {
+    fn get_pks_by_owner_id(&self, owner_id: AccountId) -> HashSet<PublicKey> {
         self.owners.get(&owner_id).unwrap_or(HashSet::new())
     }
     /// view the red packet detail related to public key
-    pub fn get_red_packet_by_pk(&self, public_key: PublicKey) -> Option<RedPacketView> {
+    fn get_red_packet_by_pk(&self, public_key: PublicKey) -> Option<RedPacketView> {
         let mut red_packet_view: RedPacketView = self.red_packets.get(&public_key)?.into();
         red_packet_view.public_key = Some(public_key);
         Some(red_packet_view)

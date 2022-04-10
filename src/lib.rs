@@ -11,6 +11,7 @@ mod cross_self;
 mod resolver;
 mod impl_saika_red_packet;
 mod view;
+mod saika_red_packet;
 
 use crate::dynamic_storage_management::DynamicStorageManager;
 use crate::enums::StorageKey;
