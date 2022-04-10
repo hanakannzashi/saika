@@ -1,17 +1,14 @@
 use crate::{Contract};
 use crate::errors::*;
 use crate::utils::transfer_ft;
+use crate::saika_red_packet_resolver::SaikaRedPacketResolver;
 
 use near_sdk::{AccountId, is_promise_success, log, near_bindgen};
 use near_sdk::json_types::U128;
 
 
-trait Resolver {
-    fn claim_fungible_token_red_packet_callback(&mut self, owner_id: AccountId, amount: U128, token_id: AccountId);
-}
-
 #[near_bindgen]
-impl Resolver for Contract {
+impl SaikaRedPacketResolver for Contract {
     #[private]
     fn claim_fungible_token_red_packet_callback(&mut self, owner_id: AccountId, amount: U128, token_id: AccountId) {
         if !is_promise_success() {

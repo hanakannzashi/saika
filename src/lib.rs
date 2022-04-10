@@ -3,15 +3,16 @@ mod constants;
 mod utils;
 mod enums;
 mod cross_other;
-mod fungible_token_receiver;
+mod impl_fungible_token_receiver;
 mod errors;
 mod impl_storage_management;
 mod dynamic_storage_management;
 mod cross_self;
-mod resolver;
+mod saika_red_packet_resolver;
 mod impl_saika_red_packet;
 mod view;
 mod saika_red_packet;
+mod impl_saika_red_packet_resolver;
 
 use crate::dynamic_storage_management::DynamicStorageManager;
 use crate::enums::StorageKey;
@@ -42,9 +43,3 @@ impl Contract {
         }
     }
 }
-
-
-
-
-
-

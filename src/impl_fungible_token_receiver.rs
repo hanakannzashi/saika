@@ -15,9 +15,9 @@ impl FungibleTokenReceiver for Contract {
         if msg.is_empty() {
             PromiseOrValue::Value(amount)
         } else {
-            let msg = serde_json::from_str::<ReceiverMessage>(msg.as_str())
+            let receiver_message = serde_json::from_str::<ReceiverMessage>(msg.as_str())
                 .expect(ERR_11_WRONG_RECEIVER_MESSAGE);
-            match msg {
+            match receiver_message {
                 ReceiverMessage::FungibleTokenRedPacket {
                     public_key,
                     split,
