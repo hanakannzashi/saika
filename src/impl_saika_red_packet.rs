@@ -4,7 +4,7 @@ use crate::dynamic_storage_management::{DynamicStorageBasic, DynamicStorageCore}
 use crate::errors::*;
 use crate::red_packet::RedPacket;
 use crate::Contract;
-use crate::view::RedPacketView;
+use crate::red_packet_view::RedPacketView;
 use crate::saika_red_packet::SaikaRedPacket;
 
 use std::collections::HashSet;

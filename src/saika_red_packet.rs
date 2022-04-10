@@ -1,5 +1,5 @@
 use crate::enums::DistributionMod;
-use crate::view::RedPacketView;
+use crate::red_packet_view::RedPacketView;
 
 use std::collections::HashSet;
 use near_sdk::{AccountId, PublicKey};

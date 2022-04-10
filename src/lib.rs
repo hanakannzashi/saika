@@ -10,7 +10,7 @@ mod dynamic_storage_management;
 mod cross_self;
 mod saika_red_packet_resolver;
 mod impl_saika_red_packet;
-mod view;
+mod red_packet_view;
 mod saika_red_packet;
 mod impl_saika_red_packet_resolver;
 
