@@ -31,6 +31,7 @@ impl DynamicStorageManager {
 
 impl DynamicStorageBasic for DynamicStorageManager {
     /// Register account with any storage balance.
+    /// The storage usage change caused by this method has been calculated.
     /// Panic when account is already registered.
     fn register_account(&mut self, account_id: AccountId, deposit_balance: Balance) {
         if self.account_registered(&account_id) {

@@ -15,34 +15,21 @@
 //!     pub fn register_account(&mut self, account_id: AccountId) {
 //!         let amount = env::attached_deposit();
 //!         require!(amount > 0, "No balance for storage");
-//!         if !self.storage_manager.account_registered(&account_id) {
-//!             self.storage_manager.register_account(
-//!                 account_id,
-//!                 amount
-//!             );
-//!         } else {
-//!             log!("Account is already registered, refund balance");
-//!             Promise::new(env::predecessor_account_id())
-//!                 .transfer(amount);
-//!         }
+//!         self.storage_manager.assert_no_registration(&account_id);
+//!         self.storage_manager.register_account(account_id, amount);
 //!     }
 //!
 //!     // storage change method
 //!     pub fn set_status(&mut self, message: String) {
-//!         let account_id = env::predecessor_account_id();
-//!         if !self.storage_manager.account_registered(&account_id) {
-//!             panic!("Account is not registered");
-//!         }
-//!
+//!         self.storage_manager.assert_registration(&account_id);
 //!         // start
 //!         self.storage_manager.start_measure_storage();
-//!
-//!         // your storage change action
+//!         // your storage change operation
 //!         self.records.insert(&account_id, &message);
-//!
 //!         // stop and update
 //!         self.storage_manager
 //!             .stop_measure_and_update_account_storage_usage(&account_id);
+//!         self.storage_manager.assert_storage_balance(&account_id);
 //!     }
 //! }
 //! ```
