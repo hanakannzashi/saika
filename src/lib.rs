@@ -35,6 +35,7 @@ struct Contract {
 #[near_bindgen]
 impl Contract {
     #[init]
+    #[private]
     pub fn init() -> Self {
         Self {
             red_packets: LookupMap::new(StorageKey::RedPackets),
