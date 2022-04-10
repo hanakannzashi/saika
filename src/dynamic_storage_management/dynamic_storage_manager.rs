@@ -2,12 +2,13 @@ use super::storage_measurement::StorageMeasurement;
 use super::account_storage_usage::AccountStorageUsage;
 use super::errors::{ERROR_ACCOUNT_ALREADY_REGISTERED, ERROR_ACCOUNT_NOT_REGISTERED};
 
-use near_sdk::{AccountId, Balance, IntoStorageKey};
+use near_sdk::{AccountId, Balance, IntoStorageKey, require};
 use near_sdk::borsh::{self,BorshDeserialize,BorshSerialize};
 use near_sdk::collections::LookupMap;
 use near_sdk::json_types::U128;
 use crate::dynamic_storage_management::dynamic_storage_basic::DynamicStorageBasic;
 use crate::dynamic_storage_management::dynamic_storage_core::DynamicStorageCore;
+use crate::dynamic_storage_management::errors::ERROR_NOT_ENOUGH_STORAGE_BALANCE;
 
 
 #[derive(BorshDeserialize,BorshSerialize)]
@@ -35,13 +36,11 @@ impl DynamicStorageBasic for DynamicStorageManager {
         if self.account_registered(&account_id) {
             panic!("{}", ERROR_ACCOUNT_ALREADY_REGISTERED);
         };
-
-        self.start_measure_storage();
-
         let mut account_storage_usage = AccountStorageUsage::default();
         account_storage_usage.deposit_storage_balance(deposit_balance);
-        self.accounts.insert(&account_id, &account_storage_usage);
 
+        self.start_measure_storage();
+        self.accounts.insert(&account_id, &account_storage_usage);
         self.stop_measure_and_update_account_storage_usage(&account_id);
     }
     /// Unregister account.
@@ -91,13 +90,12 @@ impl DynamicStorageBasic for DynamicStorageManager {
         self.accounts.get(account_id).is_some()
     }
     /// Whether account has enough balance to recover storage usage.
-    /// Panic when account is not registered.
+    /// If account is not registered or storage balance is not enough, return false, else return true.
     fn enough_storage_balance(&self, account_id: &AccountId) -> bool {
-        let account_storage_usage = self.accounts
-            .get(account_id)
-            .expect(ERROR_ACCOUNT_NOT_REGISTERED);
-        let (total, current) = account_storage_usage.storage_balance();
-        total >= current
+        match self.storage_balance(account_id) {
+            None => false,
+            Some((total, current)) => total >= current
+        }
     }
     /// Get storage balance.
     /// If account is not registered, return [None], else return tuple (total, current).
@@ -106,6 +104,18 @@ impl DynamicStorageBasic for DynamicStorageManager {
         let account_storage_usage = self.accounts.get(account_id)?;
         let storage_balance = account_storage_usage.storage_balance();
         Some(storage_balance)
+    }
+
+    fn assert_no_registration(&self, account_id: &AccountId) {
+        require!(!self.account_registered(account_id), ERROR_ACCOUNT_ALREADY_REGISTERED);
+    }
+
+    fn assert_registration(&self, account_id: &AccountId) {
+        require!(self.account_registered(account_id), ERROR_ACCOUNT_NOT_REGISTERED);
+    }
+
+    fn assert_storage_balance(&self, account_id: &AccountId) {
+        require!(self.enough_storage_balance(account_id), ERROR_NOT_ENOUGH_STORAGE_BALANCE);
     }
 }
 

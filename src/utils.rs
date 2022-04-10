@@ -1,13 +1,19 @@
+use crate::cross_other::*;
+use crate::cross_self::*;
+use crate::constants::*;
+
 use std::cmp::min;
-use crate::ext_others::*;
-use crate::constant::*;
-use near_sdk::{AccountId, Balance, env, Promise};
+use near_sdk::{AccountId, Balance, env, Promise, require};
 use near_sdk::json_types::U128;
 
 
+pub fn assert_zero_deposit(amount: Balance) {
+    require!(amount > 0, "Deposit amount is 0");
+}
+
 pub fn average_sub(number: u128, split: usize) -> u128 {
     let split = split as u128;
-    assert!(number >= split, "number must >= split");
+    require!(number >= split, "number must >= split");
     return number / split
 }
 
@@ -15,7 +21,7 @@ pub fn random_sub(number: u128, split: usize, min_sub: Option<u128>) -> u128 {
     // The closer min_sub gets to 0, the fairer it is
     let min_sub = min_sub.unwrap_or(1);
     let split = split as u128;
-    assert!(number >= split * min_sub, "number must >= split * min_sub, default min_sub == 1");
+    require!(number >= split * min_sub, "number must >= split * min_sub, default min_sub == 1");
     if split == 1 {
         return number;
     };
@@ -40,4 +46,18 @@ pub fn transfer(to: AccountId, amount: Balance) -> Promise {
 
 pub fn transfer_ft(to: AccountId, amount: U128, token_id: AccountId) -> Promise {
     ext_ft::ft_transfer(to, amount, None, token_id, ONE_YOCTO, GAS_FOR_FT_TRANSFER)
+}
+
+pub fn transfer_ft_with_claim_fungible_token_red_packet_callback(to: AccountId, amount: U128, token_id: AccountId, owner_id: AccountId) -> Promise {
+    transfer_ft(to, amount, token_id.clone())
+        .then(
+            ext_self::claim_fungible_token_red_packet_callback(
+                owner_id,
+                amount,
+                token_id,
+                env::current_account_id(),
+                NO_DEPOSIT,
+                GAS_FOR_CLAIM_FUNGIBLE_TOKEN_RED_PACKET_CALLBACK
+            )
+        )
 }

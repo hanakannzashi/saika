@@ -1,8 +1,11 @@
+use crate::*;
+use crate::dynamic_storage_management::DynamicStorageBasic;
+use crate::errors::*;
+use crate::utils::{assert_zero_deposit, transfer};
+
 use near_contract_standards::storage_management::{StorageBalance, StorageBalanceBounds, StorageManagement};
 use near_sdk::{near_bindgen, AccountId, env, assert_one_yocto};
 use near_sdk::json_types::U128;
-use crate::*;
-use crate::dynamic_storage_management::DynamicStorageBasic;
 
 
 #[near_bindgen]
@@ -36,15 +39,12 @@ impl Contract {
         let account_id = account_id.unwrap_or(env::predecessor_account_id());
         let registration_only = registration_only.unwrap_or(false);
         let amount = env::attached_deposit();
-        require!(amount > 0, "No balance for storage");
+
+        assert_zero_deposit(amount);
 
         if registration_only {
-            if !self.storage_manager.account_registered(&account_id) {
-                self.storage_manager.register_account(account_id.clone(), amount);
-            } else {
-                log!("{}", ERR_23_ACCOUNT_ALREADY_REGISTERED);
-                transfer(account_id.clone(), amount);
-            };
+            self.storage_manager.assert_no_registration(&account_id);
+            self.storage_manager.register_account(account_id.clone(), amount);
         } else {
             self.storage_manager.register_account_or_deposit_storage_balance(account_id.clone(), amount);
         };
@@ -53,9 +53,7 @@ impl Contract {
     }
 
     fn internal_storage_withdraw(&mut self, account_id: AccountId, amount: Option<U128>) -> StorageBalance {
-        if !self.storage_manager.account_registered(&account_id) {
-            panic!("{}", ERR_21_ACCOUNT_NOT_REGISTERED);
-        };
+        self.storage_manager.assert_registration(&account_id);
 
         let withdraw_balance = self.storage_manager.withdraw_storage_balance(&account_id, amount);
         if withdraw_balance > 0 {
@@ -70,12 +68,10 @@ impl Contract {
         let account_id = env::predecessor_account_id();
         let force = force.unwrap_or(false);
 
-        if !self.storage_manager.account_registered(&account_id) {
-            panic!("{}", ERR_21_ACCOUNT_NOT_REGISTERED);
-        };
+        self.storage_manager.assert_registration(&account_id);
 
-        if self.all_saika_red_packets_run_out(&account_id) || force {
-            self.clear_saika_red_packets(&account_id, force);
+        if self.all_red_packets_run_out(&account_id) || force {
+            self.clear_red_packets(&account_id, force);
             let withdraw_balance = self.storage_manager.unregister_account(&account_id);
             if withdraw_balance > 0 {
                 transfer(account_id, withdraw_balance);

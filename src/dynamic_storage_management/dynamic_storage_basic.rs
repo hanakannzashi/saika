@@ -17,4 +17,10 @@ pub trait DynamicStorageBasic {
     fn enough_storage_balance(&self, account_id: &AccountId) -> bool;
 
     fn storage_balance(&self, account_id: &AccountId) -> Option<(Balance, Balance)>;
+
+    fn assert_no_registration(&self, account_id: &AccountId);
+
+    fn assert_registration(&self, account_id: &AccountId);
+
+    fn assert_storage_balance(&self, account_id: &AccountId);
 }
