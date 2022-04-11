@@ -55,7 +55,7 @@ impl SaikaRedPacket for Contract {
         self.owners.get(&owner_id).unwrap_or(HashSet::new())
             .into_iter()
             .map(|public_key|{
-                let mut red_packet_view:RedPacketView = self.red_packets
+                let mut red_packet_view: RedPacketView = self.red_packets
                     .get(&public_key)
                     .unwrap()
                     .into();
