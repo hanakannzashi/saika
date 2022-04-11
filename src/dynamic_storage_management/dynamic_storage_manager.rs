@@ -42,7 +42,7 @@ impl DynamicStorageBasic for DynamicStorageManager {
 
         self.start_measure_storage();
         self.accounts.insert(&account_id, &account_storage);
-        self.stop_measure_and_update_account_storage_usage(&account_id);
+        self.stop_measure_and_update_storage_usage(&account_id);
     }
     /// Unregister account.
     /// Return remaining balance.
@@ -131,7 +131,7 @@ impl DynamicStorageCore for DynamicStorageManager {
     }
     /// Update account storage usage, then reset measurement.
     /// Panic when 1.Account is not registered. 2.Measurement is pending.
-    fn update_account_storage_usage(&mut self, account_id: &AccountId) {
+    fn update_storage_usage(&mut self, account_id: &AccountId) {
         let mut account_storage = self.accounts
             .get(account_id)
             .expect(ERROR_ACCOUNT_NOT_REGISTERED);
@@ -144,8 +144,8 @@ impl DynamicStorageCore for DynamicStorageManager {
     }
     /// Stop measure storage and update account storage usage immediately, then reset measurement.
     /// Panic when 1.Account is not registered 2.Missing start measurement 3.Measurement is pending.
-    fn stop_measure_and_update_account_storage_usage(&mut self, account_id: &AccountId) {
+    fn stop_measure_and_update_storage_usage(&mut self, account_id: &AccountId) {
         self.stop_measure_storage();
-        self.update_account_storage_usage(account_id);
+        self.update_storage_usage(account_id);
     }
 }

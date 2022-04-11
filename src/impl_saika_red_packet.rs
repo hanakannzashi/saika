@@ -105,7 +105,7 @@ impl Contract {
 
         self.storage_manager.start_measure_storage();
         self.add_red_packet(owner_id.clone(), public_key, near_red_packet);
-        self.storage_manager.stop_measure_and_update_account_storage_usage(&owner_id);
+        self.storage_manager.stop_measure_and_update_storage_usage(&owner_id);
 
         self.assert_storage_after(&owner_id);
     }
@@ -138,7 +138,7 @@ impl Contract {
 
         self.storage_manager.start_measure_storage();
         self.add_red_packet(owner_id.clone(), public_key, ft_red_packet);
-        self.storage_manager.stop_measure_and_update_account_storage_usage(&owner_id);
+        self.storage_manager.stop_measure_and_update_storage_usage(&owner_id);
 
         self.assert_storage_after(&owner_id);
 
@@ -154,7 +154,7 @@ impl Contract {
 
         self.storage_manager.start_measure_storage();
         self.red_packets.insert(&public_key, &red_packet);
-        self.storage_manager.stop_measure_and_update_account_storage_usage(&red_packet.owner_id);
+        self.storage_manager.stop_measure_and_update_storage_usage(&red_packet.owner_id);
 
         if claim_amount.0 != 0 {
             match red_packet.token {
@@ -185,7 +185,7 @@ impl Contract {
 
         self.storage_manager.start_measure_storage();
         self.red_packets.insert(&public_key, &red_packet);
-        self.storage_manager.stop_measure_and_update_account_storage_usage(&owner_id);
+        self.storage_manager.stop_measure_and_update_storage_usage(&owner_id);
 
         if refund_amount.0 != 0 {
             match red_packet.token {
@@ -206,7 +206,7 @@ impl Contract {
 
         self.storage_manager.start_measure_storage();
         self.remove_red_packet(&public_key,&owner_id,false);
-        self.storage_manager.stop_measure_and_update_account_storage_usage(&owner_id);
+        self.storage_manager.stop_measure_and_update_storage_usage(&owner_id);
     }
 
     pub fn internal_clear_history(&mut self) {
@@ -214,7 +214,7 @@ impl Contract {
 
         self.storage_manager.start_measure_storage();
         self.clear_red_packets(&owner_id,false);
-        self.storage_manager.stop_measure_and_update_account_storage_usage(&owner_id);
+        self.storage_manager.stop_measure_and_update_storage_usage(&owner_id);
     }
 }
 

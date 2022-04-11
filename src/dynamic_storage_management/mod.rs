@@ -27,8 +27,7 @@
 //!         // your storage change operation
 //!         self.records.insert(&account_id, &message);
 //!         // stop and update
-//!         self.storage_manager
-//!             .stop_measure_and_update_account_storage_usage(&account_id);
+//!         self.storage_manager.stop_measure_and_update_storage_usage(&account_id);
 //!         self.storage_manager.assert_storage_balance(&account_id);
 //!     }
 //! }
