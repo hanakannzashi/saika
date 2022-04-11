@@ -18,12 +18,14 @@ pub struct RedPacket {
     pub owner_id: AccountId,
     init_balance: U128,
     current_balance: U128,
-    refund_balance: U128,
-    split: usize,
+    refunded_balance: U128,
+    init_copies: usize,
+    current_copies: usize,
     distribution_mod: DistributionMod,
     msg: Option<String>,
     white_list: Option<HashSet<AccountId>>,
     claimers: HashMap<AccountId, U128>,
+    failed_claimers: HashMap<AccountId, U128>,
     create_timestamp: u64,
     run_out_timestamp: Option<u64>
 }
@@ -34,7 +36,7 @@ impl RedPacket {
         token_id: Option<AccountId>,
         owner_id: AccountId,
         init_balance: U128,
-        split: usize,
+        init_copies: usize,
         distribution_mod: DistributionMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
@@ -45,12 +47,14 @@ impl RedPacket {
             owner_id,
             init_balance,
             current_balance: init_balance,
-            refund_balance: U128(0),
-            split,
+            refunded_balance: U128(0),
+            init_copies,
+            current_copies: init_copies,
             distribution_mod,
             msg,
             white_list,
             claimers: HashMap::new(),
+            failed_claimers: HashMap::new(),
             create_timestamp: env::block_timestamp(),
             run_out_timestamp: None
         };
@@ -61,7 +65,7 @@ impl RedPacket {
     }
 
     pub fn is_run_out(&self) -> bool {
-        self.current_balance.0 == 0
+        self.current_copies == 0
     }
 
     pub fn is_valid(&self) -> bool {
@@ -78,10 +82,10 @@ impl RedPacket {
             }
         }
 
-        if self.split == 0 || self.split > MAX_RED_PACKET_SPLIT {
+        if self.init_copies == 0 || self.init_copies > MAX_RED_PACKET_COPIES {
             return false;
         }
-        if self.init_balance.0 < self.split as u128 {
+        if self.init_balance.0 < self.init_copies as u128 {
             return false;
         }
         if let Some(msg) = &self.msg {
@@ -90,7 +94,7 @@ impl RedPacket {
             }
         }
         if let Some(wl) = &self.white_list {
-            if wl.len() != self.split as usize {
+            if wl.len() != self.init_copies as usize {
                 return false;
             }
         }
@@ -120,20 +124,21 @@ impl RedPacket {
             DistributionMod::Average => {
                 claim_amount = average_sub(
                     self.current_balance.0,
-                    self.split - self.claimers.len()
+                    self.current_copies
                 );
             },
             DistributionMod::Random => {
                 claim_amount = random_sub(
                     self.current_balance.0,
-                    self.split - self.claimers.len(),
+                    self.current_copies,
                     None
                 );
             }
         };
 
-        self.current_balance.0 -= claim_amount;
         self.claimers.insert(claimer_id, claim_amount.into());
+        self.current_balance.0 -= claim_amount;
+        self.current_copies -= 1;
 
         if self.is_run_out() {
             self.run_out_timestamp = Some(env::block_timestamp());
@@ -151,14 +156,21 @@ impl RedPacket {
             return Err(ERR_02_NO_PERMISSION_TO_RED_PACKET);
         };
 
-        self.refund_balance = self.current_balance;
+        self.refunded_balance.0 += self.current_balance.0;
         self.current_balance = U128(0);
+        self.current_copies = 0;
         if let Some(wl) = &mut self.white_list {
             wl.clear();
         };
         self.run_out_timestamp = Some(env::block_timestamp());
 
-        Ok(self.refund_balance)
+        Ok(self.refunded_balance)
+    }
+
+    pub fn failed_claimer(&mut self, claimer_id: AccountId, failed_amount: U128) {
+        self.claimers.remove(&claimer_id);
+        self.failed_claimers.insert(claimer_id, failed_amount);
+        self.refunded_balance.0 += failed_amount.0;
     }
 }
 

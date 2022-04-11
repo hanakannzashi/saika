@@ -124,12 +124,12 @@ impl DynamicStorageCore for DynamicStorageManager {
     fn start_measure_storage(&mut self) {
         self.storage_measurement.start();
     }
-    /// Stop measure storage, it will calculate and save the storage change from the latest start to the present and set measurement pause.
+    /// Stop measure storage, it will calculate and save the storage change from the latest start to the present and set measurement idle.
     /// Panic when missing start measurement.
     fn stop_measure_storage(&mut self) {
         self.storage_measurement.stop();
     }
-    /// Update account storage usage, then reset measurement.
+    /// Update storage usage, then reset measurement.
     /// Panic when 1.Account is not registered. 2.Measurement is pending.
     fn update_storage_usage(&mut self, account_id: &AccountId) {
         let mut account_storage = self.accounts
@@ -142,7 +142,7 @@ impl DynamicStorageCore for DynamicStorageManager {
         }
         self.storage_measurement.reset();
     }
-    /// Stop measure storage and update account storage usage immediately, then reset measurement.
+    /// Stop measure storage and update storage usage immediately, then reset measurement.
     /// Panic when 1.Account is not registered 2.Missing start measurement 3.Measurement is pending.
     fn stop_measure_and_update_storage_usage(&mut self, account_id: &AccountId) {
         self.stop_measure_storage();

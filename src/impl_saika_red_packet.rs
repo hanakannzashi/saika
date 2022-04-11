@@ -19,7 +19,7 @@ impl SaikaRedPacket for Contract {
     fn create_near_red_packet(
         &mut self,
         public_key: PublicKey,
-        split: usize,
+        init_copies: usize,
         distribution_mod: DistributionMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
@@ -28,7 +28,7 @@ impl SaikaRedPacket for Contract {
             env::predecessor_account_id(),
             env::attached_deposit(),
             public_key,
-            split,
+            init_copies,
             distribution_mod,
             msg,
             white_list
@@ -83,7 +83,7 @@ impl Contract {
         owner_id: AccountId,
         init_balance: Balance,
         public_key: PublicKey,
-        split: usize,
+        init_copies: usize,
         distribution_mod: DistributionMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
@@ -97,7 +97,7 @@ impl Contract {
             None,
             owner_id.clone(),
             init_balance.into(),
-            split,
+            init_copies,
             distribution_mod,
             msg,
             white_list
@@ -116,7 +116,7 @@ impl Contract {
         owner_id: AccountId,
         init_balance: U128,
         public_key: PublicKey,
-        split: usize,
+        init_copies: usize,
         distribution_mod: DistributionMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
@@ -130,7 +130,7 @@ impl Contract {
             Some(token_id),
             owner_id.clone(),
             init_balance,
-            split,
+            init_copies,
             distribution_mod,
             msg,
             white_list,
@@ -166,7 +166,8 @@ impl Contract {
                         claimer_id,
                         claim_amount,
                         red_packet.token_id.clone().unwrap(),
-                        red_packet.owner_id
+                        red_packet.owner_id,
+                        public_key
                     );
                 }
             };

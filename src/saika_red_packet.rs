@@ -10,7 +10,7 @@ pub trait SaikaRedPacket {
     fn create_near_red_packet(
         &mut self,
         public_key: PublicKey,
-        split: usize,
+        init_copies: usize,
         distribution_mod: DistributionMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>

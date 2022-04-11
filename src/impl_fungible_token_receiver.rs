@@ -20,7 +20,7 @@ impl FungibleTokenReceiver for Contract {
             match receiver_message {
                 ReceiverMessage::FungibleTokenRedPacket {
                     public_key,
-                    split,
+                    init_copies,
                     distribution_mod,
                     msg,
                     white_list
@@ -30,7 +30,7 @@ impl FungibleTokenReceiver for Contract {
                         sender_id,
                         amount,
                         public_key,
-                        split,
+                        init_copies,
                         distribution_mod,
                         msg,
                         white_list
@@ -46,7 +46,7 @@ impl FungibleTokenReceiver for Contract {
 pub enum ReceiverMessage {
     FungibleTokenRedPacket {
         public_key: PublicKey,
-        split: usize,
+        init_copies: usize,
         distribution_mod: DistributionMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>

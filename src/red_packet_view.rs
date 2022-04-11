@@ -17,12 +17,14 @@ pub struct RedPacketView {
     pub owner_id: AccountId,
     pub init_balance: U128,
     pub current_balance: U128,
-    pub refund_balance: U128,
-    pub split: usize,
+    pub refunded_balance: U128,
+    pub init_copies: usize,
+    pub current_copies: usize,
     pub distribution_mod: DistributionMod,
     pub msg: Option<String>,
     pub white_list: Option<HashSet<AccountId>>,
     pub claimers: HashMap<AccountId, U128>,
+    pub failed_claimers: HashMap<AccountId, U128>,
     pub create_timestamp: u64,
     pub run_out_timestamp: Option<u64>
 }

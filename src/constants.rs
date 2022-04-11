@@ -1,6 +1,6 @@
 use near_sdk::{Balance, Gas};
 
-pub const MAX_RED_PACKET_SPLIT: usize = 100;
+pub const MAX_RED_PACKET_COPIES: usize = 100;
 pub const MAX_RED_PACKET_MSG_LEN: usize = 100;
 
 pub const NO_DEPOSIT: Balance = 0;
