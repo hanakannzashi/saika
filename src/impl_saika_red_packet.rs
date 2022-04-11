@@ -19,7 +19,7 @@ impl SaikaRedPacket for Contract {
     fn create_near_red_packet(
         &mut self,
         public_key: PublicKey,
-        init_copies: usize,
+        split: usize,
         distribution_mod: DistributionMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
@@ -28,7 +28,7 @@ impl SaikaRedPacket for Contract {
             env::predecessor_account_id(),
             env::attached_deposit(),
             public_key,
-            init_copies,
+            split,
             distribution_mod,
             msg,
             white_list
@@ -81,14 +81,14 @@ impl Contract {
     pub fn internal_create_near_red_packet(
         &mut self,
         owner_id: AccountId,
-        init_balance: Balance,
+        amount: Balance,
         public_key: PublicKey,
-        init_copies: usize,
+        split: usize,
         distribution_mod: DistributionMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
     ) {
-        assert_zero_deposit(init_balance);
+        assert_zero_deposit(amount);
         self.assert_storage_before(&owner_id);
         self.assert_creation(&public_key);
 
@@ -96,8 +96,8 @@ impl Contract {
             Token::NEAR,
             None,
             owner_id.clone(),
-            init_balance.into(),
-            init_copies,
+            amount.into(),
+            split,
             distribution_mod,
             msg,
             white_list
@@ -114,14 +114,14 @@ impl Contract {
         &mut self,
         token_id: AccountId,
         owner_id: AccountId,
-        init_balance: U128,
+        amount: U128,
         public_key: PublicKey,
-        init_copies: usize,
+        split: usize,
         distribution_mod: DistributionMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
     ) -> PromiseOrValue<U128> {
-        assert_zero_deposit(init_balance.0.into());
+        assert_zero_deposit(amount.0.into());
         self.assert_storage_before(&owner_id);
         self.assert_creation(&public_key);
 
@@ -129,8 +129,8 @@ impl Contract {
             Token::FungibleToken,
             Some(token_id),
             owner_id.clone(),
-            init_balance,
-            init_copies,
+            amount,
+            split,
             distribution_mod,
             msg,
             white_list,

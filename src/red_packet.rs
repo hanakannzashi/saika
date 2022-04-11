@@ -19,8 +19,8 @@ pub struct RedPacket {
     init_balance: U128,
     current_balance: U128,
     refunded_balance: U128,
-    init_copies: usize,
-    current_copies: usize,
+    init_split: usize,
+    current_split: usize,
     distribution_mod: DistributionMod,
     msg: Option<String>,
     white_list: Option<HashSet<AccountId>>,
@@ -35,8 +35,8 @@ impl RedPacket {
         token: Token,
         token_id: Option<AccountId>,
         owner_id: AccountId,
-        init_balance: U128,
-        init_copies: usize,
+        amount: U128,
+        split: usize,
         distribution_mod: DistributionMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
@@ -45,11 +45,11 @@ impl RedPacket {
             token,
             token_id,
             owner_id,
-            init_balance,
-            current_balance: init_balance,
+            init_balance: amount,
+            current_balance: amount,
             refunded_balance: U128(0),
-            init_copies,
-            current_copies: init_copies,
+            init_split: split,
+            current_split: split,
             distribution_mod,
             msg,
             white_list,
@@ -65,7 +65,7 @@ impl RedPacket {
     }
 
     pub fn is_run_out(&self) -> bool {
-        self.current_copies == 0
+        self.current_split == 0
     }
 
     pub fn is_valid(&self) -> bool {
@@ -82,10 +82,10 @@ impl RedPacket {
             }
         }
 
-        if self.init_copies == 0 || self.init_copies > MAX_RED_PACKET_COPIES {
+        if self.init_split == 0 || self.init_split > MAX_RED_PACKET_SPLIT {
             return false;
         }
-        if self.init_balance.0 < self.init_copies as u128 {
+        if self.init_balance.0 < self.init_split as u128 {
             return false;
         }
         if let Some(msg) = &self.msg {
@@ -94,7 +94,7 @@ impl RedPacket {
             }
         }
         if let Some(wl) = &self.white_list {
-            if wl.len() != self.init_copies as usize {
+            if wl.len() != self.init_split as usize {
                 return false;
             }
         }
@@ -124,13 +124,13 @@ impl RedPacket {
             DistributionMod::Average => {
                 claim_amount = average_sub(
                     self.current_balance.0,
-                    self.current_copies
+                    self.current_split
                 );
             },
             DistributionMod::Random => {
                 claim_amount = random_sub(
                     self.current_balance.0,
-                    self.current_copies,
+                    self.current_split,
                     None
                 );
             }
@@ -138,7 +138,7 @@ impl RedPacket {
 
         self.claimers.insert(claimer_id, claim_amount.into());
         self.current_balance.0 -= claim_amount;
-        self.current_copies -= 1;
+        self.current_split -= 1;
 
         if self.is_run_out() {
             self.run_out_timestamp = Some(env::block_timestamp());
@@ -158,7 +158,7 @@ impl RedPacket {
 
         self.refunded_balance.0 += self.current_balance.0;
         self.current_balance = U128(0);
-        self.current_copies = 0;
+        self.current_split = 0;
         if let Some(wl) = &mut self.white_list {
             wl.clear();
         };
