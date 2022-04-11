@@ -55,9 +55,9 @@ impl Contract {
     fn internal_storage_withdraw(&mut self, account_id: AccountId, amount: Option<U128>) -> StorageBalance {
         self.storage_manager.assert_registration(&account_id);
 
-        let withdraw_balance = self.storage_manager.withdraw_storage_balance(&account_id, amount);
-        if withdraw_balance > 0 {
-            transfer(account_id.clone(), withdraw_balance);
+        let withdraw_amount = self.storage_manager.withdraw_storage_balance(&account_id, amount);
+        if withdraw_amount > 0 {
+            transfer(account_id.clone(), withdraw_amount);
         };
 
         self.internal_storage_balance_of(account_id).unwrap()
@@ -87,12 +87,12 @@ impl Contract {
     }
 
     pub fn internal_storage_balance_of(&self, account_id: AccountId) -> Option<StorageBalance> {
-        let (total, current) = self.storage_manager.storage_balance(&account_id)?;
+        let (total, used) = self.storage_manager.storage_balance(&account_id)?;
         let available;
-        if current >= total {
+        if used >= total {
             available = 0;
         } else {
-            available = total - current;
+            available = total - used;
         };
         Some(
             StorageBalance {

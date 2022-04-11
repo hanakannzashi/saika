@@ -1,5 +1,5 @@
 use super::storage_measurement::StorageMeasurement;
-use super::account_storage_usage::AccountStorageUsage;
+use super::account_storage::AccountStorage;
 use super::errors::{ERROR_ACCOUNT_ALREADY_REGISTERED, ERROR_ACCOUNT_NOT_REGISTERED};
 
 use near_sdk::{AccountId, Balance, IntoStorageKey, require};
@@ -14,7 +14,7 @@ use crate::dynamic_storage_management::errors::ERROR_NOT_ENOUGH_STORAGE_BALANCE;
 #[derive(BorshDeserialize,BorshSerialize)]
 pub struct DynamicStorageManager {
     /// Storage usage of accounts
-    accounts: LookupMap<AccountId, AccountStorageUsage>,
+    accounts: LookupMap<AccountId, AccountStorage>,
     /// Measuring storage usage and saving the storage usage change
     #[borsh_skip]
     storage_measurement: StorageMeasurement
@@ -33,37 +33,37 @@ impl DynamicStorageBasic for DynamicStorageManager {
     /// Register account with any storage balance.
     /// The storage usage change caused by this method has been calculated.
     /// Panic when account is already registered.
-    fn register_account(&mut self, account_id: AccountId, deposit_balance: Balance) {
+    fn register_account(&mut self, account_id: AccountId, amount: Balance) {
         if self.account_registered(&account_id) {
             panic!("{}", ERROR_ACCOUNT_ALREADY_REGISTERED);
         };
-        let mut account_storage_usage = AccountStorageUsage::default();
-        account_storage_usage.deposit_storage_balance(deposit_balance);
+        let mut account_storage = AccountStorage::default();
+        account_storage.deposit_storage_balance(amount);
 
         self.start_measure_storage();
-        self.accounts.insert(&account_id, &account_storage_usage);
+        self.accounts.insert(&account_id, &account_storage);
         self.stop_measure_and_update_account_storage_usage(&account_id);
     }
     /// Unregister account.
     /// Return remaining balance.
     /// Panic when account is not registered.
     fn unregister_account(&mut self, account_id: &AccountId) -> Balance {
-        let mut account_storage_usage = self.accounts
+        let mut account_storage = self.accounts
             .get(account_id)
             .expect(ERROR_ACCOUNT_NOT_REGISTERED);
-        account_storage_usage.clear_current_storage_usage();
-        let withdraw_balance = account_storage_usage.withdraw_storage_balance(None);
+        account_storage.reset_storage_usage();
+        let withdraw_amount = account_storage.withdraw_storage_balance(None);
         self.accounts.remove(account_id);
-        withdraw_balance
+        withdraw_amount
     }
     /// Deposit more storage balance.
     /// Panic when account is not registered.
-    fn deposit_storage_balance(&mut self, account_id: &AccountId, deposit_balance: Balance) {
-        let mut account_storage_usage = self.accounts
+    fn deposit_storage_balance(&mut self, account_id: &AccountId, amount: Balance) {
+        let mut account_storage = self.accounts
             .get(account_id)
             .expect(ERROR_ACCOUNT_NOT_REGISTERED);
-        account_storage_usage.deposit_storage_balance(deposit_balance);
-        self.accounts.insert(account_id, &account_storage_usage);
+        account_storage.deposit_storage_balance(amount);
+        self.accounts.insert(account_id, &account_storage);
     }
     /// Withdraw storage balance.
     /// If amount is [None] or amount is greater than available balance,
@@ -71,19 +71,19 @@ impl DynamicStorageBasic for DynamicStorageManager {
     /// Return withdraw balance.
     /// Panic when account is not registered.
     fn withdraw_storage_balance(&mut self, account_id: &AccountId, amount: Option<U128>) -> Balance {
-        let mut account_storage_usage = self.accounts
+        let mut account_storage = self.accounts
             .get(account_id)
             .expect(ERROR_ACCOUNT_NOT_REGISTERED);
-        let withdraw_balance = account_storage_usage.withdraw_storage_balance(amount);
-        self.accounts.insert(account_id, &account_storage_usage);
-        withdraw_balance
+        let withdraw_amount = account_storage.withdraw_storage_balance(amount);
+        self.accounts.insert(account_id, &account_storage);
+        withdraw_amount
     }
     /// Register account if it is not registered, else deposit more storage balance
-    fn register_account_or_deposit_storage_balance(&mut self, account_id: AccountId, deposit_balance: Balance) {
+    fn register_account_or_deposit_storage_balance(&mut self, account_id: AccountId, amount: Balance) {
         if !self.account_registered(&account_id) {
-            self.register_account(account_id, deposit_balance);
+            self.register_account(account_id, amount);
         } else {
-            self.deposit_storage_balance(&account_id, deposit_balance);
+            self.deposit_storage_balance(&account_id, amount);
         }
     }
     /// Whether account is registered.
@@ -95,16 +95,14 @@ impl DynamicStorageBasic for DynamicStorageManager {
     fn enough_storage_balance(&self, account_id: &AccountId) -> bool {
         match self.storage_balance(account_id) {
             None => false,
-            Some((total, current)) => total >= current
+            Some((total, used)) => total >= used
         }
     }
     /// Get storage balance.
-    /// If account is not registered, return [None], else return tuple (total, current).
-    /// Note: current storage balance may be greater than total due to changing storage prices or incorrect storage ownership.
+    /// If account is not registered, return [None], else return tuple (total, used).
+    /// Note: used storage balance may be greater than total due to changing storage prices or incorrect storage ownership.
     fn storage_balance(&self, account_id: &AccountId) -> Option<(Balance, Balance)> {
-        let account_storage_usage = self.accounts.get(account_id)?;
-        let storage_balance = account_storage_usage.storage_balance();
-        Some(storage_balance)
+        Some(self.accounts.get(account_id)?.storage_balance())
     }
 
     fn assert_no_registration(&self, account_id: &AccountId) {
@@ -129,18 +127,18 @@ impl DynamicStorageCore for DynamicStorageManager {
     /// Stop measure storage, it will calculate and save the storage change from the latest start to the present and set measurement pause.
     /// Panic when missing start measurement.
     fn stop_measure_storage(&mut self) {
-        self.storage_measurement.end();
+        self.storage_measurement.stop();
     }
     /// Update account storage usage, then reset measurement.
     /// Panic when 1.Account is not registered. 2.Measurement is pending.
     fn update_account_storage_usage(&mut self, account_id: &AccountId) {
-        let mut account_storage_usage = self.accounts
+        let mut account_storage = self.accounts
             .get(account_id)
             .expect(ERROR_ACCOUNT_NOT_REGISTERED);
         let storage_usage_change = self.storage_measurement.storage_usage_change();
         if storage_usage_change != 0 {
-            account_storage_usage.update_current_storage_usage(storage_usage_change);
-            self.accounts.insert(account_id, &account_storage_usage);
+            account_storage.update_storage_usage(storage_usage_change);
+            self.accounts.insert(account_id, &account_storage);
         }
         self.storage_measurement.reset();
     }

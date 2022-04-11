@@ -37,7 +37,7 @@
 mod dynamic_storage_manager;
 pub use dynamic_storage_manager::DynamicStorageManager;
 
-mod account_storage_usage;
+mod account_storage;
 mod storage_measurement;
 mod errors;
 

@@ -25,7 +25,7 @@ impl StorageMeasurement {
         self.pending = true;
     }
 
-    pub fn end(&mut self) {
+    pub fn stop(&mut self) {
         if !self.pending {
             panic!("{}", ERROR_MISSING_START_STORAGE_MEASUREMENT);
         }
