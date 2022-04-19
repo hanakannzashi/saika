@@ -2,7 +2,7 @@ use crate::enums::{DistributionMod, Token};
 use crate::RedPacket;
 
 use std::collections::{HashMap, HashSet};
-use near_sdk::{AccountId, PublicKey, serde_json};
+use near_sdk::{AccountId, PublicKey, serde_json, Timestamp};
 use near_sdk::json_types::U128;
 use near_sdk::serde_json::json;
 use near_sdk::serde::{Serialize,Deserialize};
@@ -25,8 +25,8 @@ pub struct RedPacketView {
     pub white_list: Option<HashSet<AccountId>>,
     pub claimers: HashMap<AccountId, U128>,
     pub failed_claimers: HashMap<AccountId, U128>,
-    pub create_timestamp: u64,
-    pub run_out_timestamp: Option<u64>
+    pub create_timestamp: Timestamp,
+    pub run_out_timestamp: Option<Timestamp>
 }
 
 impl From<RedPacket> for RedPacketView {
