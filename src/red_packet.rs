@@ -4,7 +4,7 @@ use crate::errors::*;
 use crate::enums::{DistributionMod, Token};
 
 use std::collections::{HashMap, HashSet};
-use near_sdk::{AccountId, env};
+use near_sdk::{AccountId, env, Timestamp};
 use near_sdk::json_types::U128;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::Serialize;
@@ -26,8 +26,8 @@ pub struct RedPacket {
     white_list: Option<HashSet<AccountId>>,
     claimers: HashMap<AccountId, U128>,
     failed_claimers: HashMap<AccountId, U128>,
-    create_timestamp: u64,
-    run_out_timestamp: Option<u64>
+    create_timestamp: Timestamp,
+    run_out_timestamp: Option<Timestamp>
 }
 
 impl RedPacket {
