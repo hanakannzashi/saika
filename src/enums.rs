@@ -19,7 +19,7 @@ pub enum Token {
 
 #[derive(BorshDeserialize,BorshSerialize,Serialize,Deserialize)]
 #[serde(crate = "near_sdk::serde")]
-pub enum DistributionMod {
+pub enum SplitMod {
     Average,
     Random
 }

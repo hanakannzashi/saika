@@ -1,7 +1,7 @@
 use crate::constants::*;
 use crate::utils::*;
 use crate::errors::*;
-use crate::enums::{DistributionMod, Token};
+use crate::enums::{SplitMod, Token};
 
 use std::collections::{HashMap, HashSet};
 use near_sdk::{AccountId, env, Timestamp};
@@ -21,7 +21,7 @@ pub struct RedPacket {
     refunded_balance: U128,
     init_split: usize,
     current_split: usize,
-    distribution_mod: DistributionMod,
+    split_mod: SplitMod,
     msg: Option<String>,
     white_list: Option<HashSet<AccountId>>,
     claimers: HashMap<AccountId, U128>,
@@ -37,7 +37,7 @@ impl RedPacket {
         owner_id: AccountId,
         amount: U128,
         split: usize,
-        distribution_mod: DistributionMod,
+        split_mod: SplitMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
     ) -> Result<Self, &'static str> {
@@ -50,7 +50,7 @@ impl RedPacket {
             refunded_balance: U128(0),
             init_split: split,
             current_split: split,
-            distribution_mod,
+            split_mod,
             msg,
             white_list,
             claimers: HashMap::new(),
@@ -120,14 +120,14 @@ impl RedPacket {
 
         let claim_amount: u128;
 
-        match self.distribution_mod {
-            DistributionMod::Average => {
+        match self.split_mod {
+            SplitMod::Average => {
                 claim_amount = average_sub(
                     self.current_balance.0,
                     self.current_split
                 );
             },
-            DistributionMod::Random => {
+            SplitMod::Random => {
                 claim_amount = random_sub(
                     self.current_balance.0,
                     self.current_split,

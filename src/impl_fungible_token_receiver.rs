@@ -1,6 +1,6 @@
 use crate::Contract;
 use crate::errors::*;
-use crate::enums::DistributionMod;
+use crate::enums::SplitMod;
 
 use std::collections::HashSet;
 use near_contract_standards::fungible_token::receiver::FungibleTokenReceiver;
@@ -21,7 +21,7 @@ impl FungibleTokenReceiver for Contract {
                 ReceiverMessage::FungibleTokenRedPacket {
                     public_key,
                     split,
-                    distribution_mod,
+                    split_mod,
                     msg,
                     white_list
                 } => {
@@ -31,7 +31,7 @@ impl FungibleTokenReceiver for Contract {
                         amount,
                         public_key,
                         split,
-                        distribution_mod,
+                        split_mod,
                         msg,
                         white_list
                     )
@@ -47,7 +47,7 @@ pub enum ReceiverMessage {
     FungibleTokenRedPacket {
         public_key: PublicKey,
         split: usize,
-        distribution_mod: DistributionMod,
+        split_mod: SplitMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
     }

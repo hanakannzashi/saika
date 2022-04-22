@@ -20,7 +20,7 @@ impl SaikaRedPacket for Contract {
         &mut self,
         public_key: PublicKey,
         split: usize,
-        distribution_mod: DistributionMod,
+        split_mod: SplitMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
     ) {
@@ -29,7 +29,7 @@ impl SaikaRedPacket for Contract {
             env::attached_deposit(),
             public_key,
             split,
-            distribution_mod,
+            split_mod,
             msg,
             white_list
         );
@@ -84,7 +84,7 @@ impl Contract {
         amount: Balance,
         public_key: PublicKey,
         split: usize,
-        distribution_mod: DistributionMod,
+        split_mod: SplitMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
     ) {
@@ -98,7 +98,7 @@ impl Contract {
             owner_id.clone(),
             amount.into(),
             split,
-            distribution_mod,
+            split_mod,
             msg,
             white_list
         ).unwrap();
@@ -117,7 +117,7 @@ impl Contract {
         amount: U128,
         public_key: PublicKey,
         split: usize,
-        distribution_mod: DistributionMod,
+        split_mod: SplitMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
     ) -> PromiseOrValue<U128> {
@@ -131,7 +131,7 @@ impl Contract {
             owner_id.clone(),
             amount,
             split,
-            distribution_mod,
+            split_mod,
             msg,
             white_list,
         ).unwrap();

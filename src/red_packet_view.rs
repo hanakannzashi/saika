@@ -1,4 +1,4 @@
-use crate::enums::{DistributionMod, Token};
+use crate::enums::{SplitMod, Token};
 use crate::RedPacket;
 
 use std::collections::{HashMap, HashSet};
@@ -20,7 +20,7 @@ pub struct RedPacketView {
     pub refunded_balance: U128,
     pub init_split: usize,
     pub current_split: usize,
-    pub distribution_mod: DistributionMod,
+    pub split_mod: SplitMod,
     pub msg: Option<String>,
     pub white_list: Option<HashSet<AccountId>>,
     pub claimers: HashMap<AccountId, U128>,

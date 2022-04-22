@@ -1,4 +1,4 @@
-use crate::enums::DistributionMod;
+use crate::enums::SplitMod;
 use crate::red_packet_view::RedPacketView;
 
 use std::collections::HashSet;
@@ -11,7 +11,7 @@ pub trait SaikaRedPacket {
         &mut self,
         public_key: PublicKey,
         split: usize,
-        distribution_mod: DistributionMod,
+        split_mod: SplitMod,
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
     );
