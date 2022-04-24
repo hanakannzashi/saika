@@ -11,21 +11,21 @@ pub fn assert_zero_deposit(amount: Balance) {
     require!(amount > 0, "Deposit amount is 0");
 }
 
-pub fn average_sub(number: u128, copies: usize) -> u128 {
-    let copies = u128::try_from(copies).unwrap();
-    require!(number >= copies, "number must >= copies");
-    return number / copies
+pub fn average_sub(number: u128, split: usize) -> u128 {
+    let split = u128::try_from(split).unwrap();
+    require!(number >= split, "number must >= split");
+    return number / split
 }
 
-pub fn random_sub(number: u128, copies: usize, min_sub: Option<u128>) -> u128 {
+pub fn random_sub(number: u128, split: usize, min_sub: Option<u128>) -> u128 {
     // The closer min_sub gets to 0, the fairer it is
     let min_sub = min_sub.unwrap_or(1);
-    let copies = u128::try_from(copies).unwrap();
-    require!(number >= copies * min_sub, "number must >= copies * min_sub, default min_sub == 1");
-    if copies == 1 {
+    let split = u128::try_from(split).unwrap();
+    require!(number >= split * min_sub, "number must >= split * min_sub, default min_sub == 1");
+    if split == 1 {
         return number;
     };
-    let max_sub = min(number - min_sub * (copies - 1), 2 * (number / copies));
+    let max_sub = min(number - min_sub * (split - 1), 2 * (number / split));
     gen_range(min_sub, max_sub + 1)
 }
 
