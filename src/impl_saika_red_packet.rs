@@ -88,9 +88,7 @@ impl Contract {
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
     ) {
-        assert_zero_deposit(amount);
-        self.assert_storage_before(&owner_id);
-        self.assert_creation(&public_key);
+        self.assert_before_creation(amount, &public_key, &owner_id);
 
         let near_red_packet = RedPacket::new_valid(
             Token::NEAR,
@@ -103,11 +101,11 @@ impl Contract {
             white_list
         ).unwrap();
 
-        self.storage_manager.start_measure_storage();
+        self.measure_start();
         self.add_red_packet(owner_id.clone(), public_key, near_red_packet);
-        self.storage_manager.stop_measure_and_update_storage_usage(&owner_id);
+        self.measure_end(&owner_id);
 
-        self.assert_storage_after(&owner_id);
+        self.assert_after_creation(&owner_id);
     }
 
     pub fn internal_create_fungible_token_red_packet(
@@ -121,9 +119,7 @@ impl Contract {
         msg: Option<String>,
         white_list: Option<HashSet<AccountId>>
     ) -> PromiseOrValue<U128> {
-        assert_zero_deposit(amount.0.into());
-        self.assert_storage_before(&owner_id);
-        self.assert_creation(&public_key);
+        self.assert_before_creation(amount.0, &public_key, &owner_id);
 
         let ft_red_packet = RedPacket::new_valid(
             Token::FungibleToken,
@@ -136,11 +132,11 @@ impl Contract {
             white_list,
         ).unwrap();
 
-        self.storage_manager.start_measure_storage();
+        self.measure_start();
         self.add_red_packet(owner_id.clone(), public_key, ft_red_packet);
-        self.storage_manager.stop_measure_and_update_storage_usage(&owner_id);
+        self.measure_end(&owner_id);
 
-        self.assert_storage_after(&owner_id);
+        self.assert_after_creation(&owner_id);
 
         PromiseOrValue::Value(U128(0))
     }
@@ -152,9 +148,9 @@ impl Contract {
             .expect(ERR_01_NO_MATCHING_RED_PACKET);
         let claim_amount = red_packet.virtual_claim(claimer_id.clone()).unwrap();
 
-        self.storage_manager.start_measure_storage();
+        self.measure_start();
         self.red_packets.insert(&public_key, &red_packet);
-        self.storage_manager.stop_measure_and_update_storage_usage(&red_packet.owner_id);
+        self.measure_end(&red_packet.owner_id);
 
         if claim_amount.0 != 0 {
             match red_packet.token {
@@ -184,9 +180,9 @@ impl Contract {
             .expect(ERR_01_NO_MATCHING_RED_PACKET);
         let refund_amount = red_packet.virtual_refund(owner_id.clone()).unwrap();
 
-        self.storage_manager.start_measure_storage();
+        self.measure_start();
         self.red_packets.insert(&public_key, &red_packet);
-        self.storage_manager.stop_measure_and_update_storage_usage(&owner_id);
+        self.measure_end(&owner_id);
 
         if refund_amount.0 != 0 {
             match red_packet.token {
@@ -205,17 +201,17 @@ impl Contract {
     pub fn internal_remove_history(&mut self, public_key: PublicKey) {
         let owner_id = env::predecessor_account_id();
 
-        self.storage_manager.start_measure_storage();
+        self.measure_start();
         self.remove_red_packet(&public_key,&owner_id,false);
-        self.storage_manager.stop_measure_and_update_storage_usage(&owner_id);
+        self.measure_end(&owner_id);
     }
 
     pub fn internal_clear_history(&mut self) {
         let owner_id = env::predecessor_account_id();
 
-        self.storage_manager.start_measure_storage();
+        self.measure_start();
         self.clear_red_packets(&owner_id,false);
-        self.storage_manager.stop_measure_and_update_storage_usage(&owner_id);
+        self.measure_end(&owner_id);
     }
 }
 
@@ -311,16 +307,22 @@ impl Contract {
         count.0 == count.1
     }
 
-    pub fn assert_creation(&self, public_key: &PublicKey) {
+    pub fn assert_before_creation(&self, amount: Balance, public_key: &PublicKey, account_id: &AccountId) {
+        assert_zero_deposit(amount);
+        self.storage_manager.assert_registration(account_id);
+        self.storage_manager.assert_storage_balance(account_id);
         require!(self.unique_public_key(public_key), ERR_05_NOT_UNIQUE_PUBLIC_KEY);
     }
 
-    pub fn assert_storage_before(&self, account_id: &AccountId) {
-        self.storage_manager.assert_registration(account_id);
+    pub fn assert_after_creation(&self, account_id: &AccountId) {
         self.storage_manager.assert_storage_balance(account_id);
     }
 
-    pub fn assert_storage_after(&self, account_id: &AccountId) {
-        self.storage_manager.assert_storage_balance(account_id);
+    pub fn measure_start(&mut self) {
+        self.storage_manager.start_measure_storage();
+    }
+
+    pub fn measure_end(&mut self, account_id: &AccountId) {
+        self.storage_manager.stop_measure_and_update_storage_usage(account_id);
     }
 }
