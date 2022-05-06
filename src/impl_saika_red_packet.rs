@@ -279,10 +279,6 @@ impl Contract {
         };
     }
 
-    pub fn unique_public_key(&self, public_key: &PublicKey) -> bool {
-        self.red_packets.get(public_key).is_none()
-    }
-
     pub fn red_packet_count(&self, owner_id: &AccountId) -> (usize, usize) {
         let mut total = 0;
         let mut run_out = 0;
@@ -307,15 +303,8 @@ impl Contract {
         count.0 == count.1
     }
 
-    pub fn assert_before_creation(&self, amount: Balance, public_key: &PublicKey, account_id: &AccountId) {
-        assert_zero_deposit(amount);
-        self.storage_manager.assert_registration(account_id);
-        self.storage_manager.assert_storage_balance(account_id);
-        require!(self.unique_public_key(public_key), ERR_05_NOT_UNIQUE_PUBLIC_KEY);
-    }
-
-    pub fn assert_after_creation(&self, account_id: &AccountId) {
-        self.storage_manager.assert_storage_balance(account_id);
+    pub fn unique_public_key(&self, public_key: &PublicKey) -> bool {
+        self.red_packets.get(public_key).is_none()
     }
 
     pub fn measure_start(&mut self) {
@@ -324,5 +313,20 @@ impl Contract {
 
     pub fn measure_end(&mut self, account_id: &AccountId) {
         self.storage_manager.stop_measure_and_update_storage_usage(account_id);
+    }
+
+    pub fn assert_unique_public_key(&self, public_key: &PublicKey) {
+        require!(self.unique_public_key(public_key), ERR_05_NOT_UNIQUE_PUBLIC_KEY);
+    }
+
+    pub fn assert_before_creation(&self, amount: Balance, public_key: &PublicKey, account_id: &AccountId) {
+        assert_zero_deposit(amount);
+        self.storage_manager.assert_registration(account_id);
+        self.storage_manager.assert_storage_balance(account_id);
+        self.assert_unique_public_key(public_key);
+    }
+
+    pub fn assert_after_creation(&self, account_id: &AccountId) {
+        self.storage_manager.assert_storage_balance(account_id);
     }
 }
