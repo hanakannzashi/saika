@@ -1,6 +1,7 @@
 # saika
 
 用于在Near链上发红包的合约
+
 支持的代币：
 * NEAR
 * FungibleToken
