@@ -45,7 +45,7 @@
     fn get_red_packet_by_pk(&self, public_key: PublicKey) -> Option<RedPacketView>;
 ```
 
-## Fungible Token Receiver
+## FungibleTokenReceiver
 ```rust
     fn ft_on_transfer(&mut self, sender_id: AccountId, amount: U128, msg: String) -> PromiseOrValue<U128>;
 ```
