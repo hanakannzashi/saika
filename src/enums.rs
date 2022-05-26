@@ -3,7 +3,7 @@ use near_sdk::serde::{Serialize,Deserialize};
 use near_sdk::BorshStorageKey;
 
 
-#[derive(BorshStorageKey,BorshDeserialize,BorshSerialize)]
+#[derive(BorshStorageKey,BorshSerialize)]
 pub enum StorageKey {
     RedPackets,
     Owners,

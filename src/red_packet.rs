@@ -4,8 +4,8 @@ use crate::errors::*;
 use crate::enums::{SplitMod, Token};
 
 use std::collections::{HashMap, HashSet};
-use near_sdk::{AccountId, env, Timestamp};
-use near_sdk::json_types::U128;
+use near_sdk::{AccountId, env};
+use near_sdk::json_types::{U128, U64};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::Serialize;
 
@@ -26,8 +26,8 @@ pub struct RedPacket {
     white_list: Option<HashSet<AccountId>>,
     claimers: HashMap<AccountId, U128>,
     failed_claimers: HashMap<AccountId, U128>,
-    create_timestamp: Timestamp,
-    run_out_timestamp: Option<Timestamp>
+    create_timestamp: U64,
+    run_out_timestamp: Option<U64>
 }
 
 impl RedPacket {
@@ -55,7 +55,7 @@ impl RedPacket {
             white_list,
             claimers: HashMap::new(),
             failed_claimers: HashMap::new(),
-            create_timestamp: env::block_timestamp(),
+            create_timestamp: U64(env::block_timestamp()),
             run_out_timestamp: None
         };
         if !red_packet.is_valid() {
@@ -141,7 +141,7 @@ impl RedPacket {
         self.current_split -= 1;
 
         if self.is_run_out() {
-            self.run_out_timestamp = Some(env::block_timestamp());
+            self.run_out_timestamp = Some(U64(env::block_timestamp()));
         };
 
         Ok(claim_amount.into())
@@ -162,7 +162,7 @@ impl RedPacket {
         if let Some(wl) = &mut self.white_list {
             wl.clear();
         };
-        self.run_out_timestamp = Some(env::block_timestamp());
+        self.run_out_timestamp = Some(U64(env::block_timestamp()));
 
         Ok(self.refunded_balance)
     }
