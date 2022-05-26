@@ -4,7 +4,7 @@ use crate::dynamic_storage_management::{DynamicStorageBasic, DynamicStorageCore}
 use crate::errors::*;
 use crate::red_packet::RedPacket;
 use crate::Contract;
-use crate::red_packet_view::RedPacketView;
+use crate::red_packet_view::{parse_red_packet_view, RedPacketView};
 use crate::saika_red_packet::SaikaRedPacket;
 
 use std::collections::HashSet;
@@ -55,12 +55,10 @@ impl SaikaRedPacket for Contract {
         self.owners.get(&owner_id).unwrap_or(HashSet::new())
             .into_iter()
             .map(|public_key|{
-                let mut red_packet_view: RedPacketView = self.red_packets
+                let red_packet = self.red_packets
                     .get(&public_key)
-                    .unwrap()
-                    .into();
-                red_packet_view.public_key = Some(public_key);
-                red_packet_view
+                    .unwrap();
+                parse_red_packet_view(&red_packet, &public_key)
             })
             .collect()
     }
@@ -70,9 +68,8 @@ impl SaikaRedPacket for Contract {
     }
     /// view the red packet detail related to public key
     fn get_red_packet_by_pk(&self, public_key: PublicKey) -> Option<RedPacketView> {
-        let mut red_packet_view: RedPacketView = self.red_packets.get(&public_key)?.into();
-        red_packet_view.public_key = Some(public_key);
-        Some(red_packet_view)
+        let red_packet = self.red_packets.get(&public_key)?;
+        Some(parse_red_packet_view(&red_packet, &public_key))
     }
 }
 
