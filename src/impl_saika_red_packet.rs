@@ -4,6 +4,7 @@ use crate::dynamic_storage_management::{DynamicStorageBasic, DynamicStorageCore}
 use crate::errors::*;
 use crate::red_packet::RedPacket;
 use crate::Contract;
+use crate::ContractExt;
 use crate::red_packet_view::{parse_red_packet_view, RedPacketView};
 use crate::saika_red_packet::SaikaRedPacket;
 
@@ -155,7 +156,7 @@ impl Contract {
                     transfer(claimer_id, claim_amount.0);
                 },
                 Token::FungibleToken => {
-                    transfer_ft_with_claim_fungible_token_red_packet_callback(
+                    transfer_ft_with_resolve_claim_fungible_token_red_packet(
                         claimer_id,
                         claim_amount,
                         red_packet.token_id.clone().unwrap(),

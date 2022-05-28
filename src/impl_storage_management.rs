@@ -1,4 +1,5 @@
-use crate::*;
+use crate::Contract;
+use crate::ContractExt;
 use crate::dynamic_storage_management::DynamicStorageBasic;
 use crate::errors::*;
 use crate::utils::{assert_zero_deposit, transfer};

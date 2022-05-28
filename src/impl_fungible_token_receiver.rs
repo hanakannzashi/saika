@@ -1,4 +1,5 @@
 use crate::Contract;
+use crate::ContractExt;
 use crate::errors::*;
 use crate::enums::SplitMod;
 

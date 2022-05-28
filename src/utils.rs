@@ -1,5 +1,5 @@
-use crate::cross_other::*;
-use crate::cross_self::*;
+use crate::cross_other::ext_ft;
+use crate::cross_self::ext_self;
 use crate::constants::*;
 
 use std::cmp::min;
@@ -45,10 +45,13 @@ pub fn transfer(to: AccountId, amount: Balance) -> Promise {
 }
 
 pub fn transfer_ft(to: AccountId, amount: U128, token_id: AccountId) -> Promise {
-    ext_ft::ft_transfer(to, amount, None, token_id, ONE_YOCTO, GAS_FOR_FT_TRANSFER)
+    ext_ft::ext(token_id)
+        .with_attached_deposit(ONE_YOCTO)
+        .with_static_gas(GAS_FOR_FT_TRANSFER)
+        .ft_transfer(to, amount, None)
 }
 
-pub fn transfer_ft_with_claim_fungible_token_red_packet_callback(
+pub fn transfer_ft_with_resolve_claim_fungible_token_red_packet(
     to: AccountId,
     amount: U128,
     token_id: AccountId,
@@ -57,15 +60,14 @@ pub fn transfer_ft_with_claim_fungible_token_red_packet_callback(
 ) -> Promise {
     transfer_ft(to.clone(), amount, token_id.clone())
         .then(
-            ext_self::claim_fungible_token_red_packet_callback(
-                to,
-                owner_id,
-                amount,
-                token_id,
-                public_key,
-                env::current_account_id(),
-                NO_DEPOSIT,
-                GAS_FOR_CLAIM_FUNGIBLE_TOKEN_RED_PACKET_CALLBACK
-            )
+            ext_self::ext(env::current_account_id())
+                .with_static_gas(GAS_FOR_RESOLVE_CLAIM_FUNGIBLE_TOKEN_RED_PACKET)
+                .resolve_claim_fungible_token_red_packet(
+                    to,
+                    owner_id,
+                    amount,
+                    token_id,
+                    public_key
+                )
         )
 }

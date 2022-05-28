@@ -4,6 +4,7 @@ use near_sdk::json_types::U128;
 
 
 #[ext_contract(ext_ft)]
-pub trait FungibleTokenCore {
+trait ExtFt {
+    #[payable]
     fn ft_transfer(&mut self, receiver_id: AccountId, amount: U128, memo: Option<String>);
 }

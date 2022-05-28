@@ -5,8 +5,9 @@ use near_sdk::PublicKey;
 
 
 #[ext_contract(ext_self)]
-pub trait SaikaRedPacketResolver {
-    fn claim_fungible_token_red_packet_callback(
+trait ExtSelf {
+    #[private]
+    fn resolve_claim_fungible_token_red_packet(
         &mut self,
         claimer_id: AccountId,
         owner_id: AccountId,
