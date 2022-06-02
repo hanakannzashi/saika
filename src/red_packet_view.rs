@@ -26,7 +26,8 @@ pub struct RedPacketView {
     pub claimers: HashMap<AccountId, U128>,
     pub failed_claimers: HashMap<AccountId, U128>,
     pub create_timestamp: U64,
-    pub run_out_timestamp: Option<U64>
+    pub run_out_timestamp: Option<U64>,
+    pub is_run_out: bool
 }
 
 pub fn parse_red_packet_view(red_packet: &RedPacket, public_key: &PublicKey) -> RedPacketView {
@@ -34,5 +35,14 @@ pub fn parse_red_packet_view(red_packet: &RedPacket, public_key: &PublicKey) -> 
     tmp.as_object_mut()
         .unwrap()
         .insert("public_key".into(), json!(public_key));
+    let run_out_timestamp = tmp.as_object()
+        .unwrap()
+        .get("run_out_timestamp")
+        .unwrap();
+    if run_out_timestamp.is_null() {
+        tmp.as_object_mut().unwrap().insert("is_run_out".into(), json!(false));
+    } else {
+        tmp.as_object_mut().unwrap().insert("is_run_out".into(), json!(true));
+    };
     serde_json::from_value::<RedPacketView>(tmp).unwrap()
 }
