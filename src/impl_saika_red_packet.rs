@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use crate::enums::*;
 use crate::utils::*;
 use crate::dynamic_storage_management::{DynamicStorageBasic, DynamicStorageCore};
@@ -10,7 +11,7 @@ use crate::saika_red_packet::SaikaRedPacket;
 
 use std::collections::HashSet;
 use near_sdk::{AccountId, env, near_bindgen, PublicKey, PromiseOrValue, require, Balance};
-use near_sdk::json_types::U128;
+use near_sdk::json_types::{U128};
 
 
 #[near_bindgen]
@@ -53,7 +54,8 @@ impl SaikaRedPacket for Contract {
     }
     /// view owner's red packets detail
     fn get_red_packets_by_owner_id(&self, owner_id: AccountId) -> Vec<RedPacketView> {
-        self.owners.get(&owner_id).unwrap_or(HashSet::new())
+        let mut vec = self.owners.get(&owner_id)
+            .unwrap_or(HashSet::new())
             .into_iter()
             .map(|public_key|{
                 let red_packet = self.red_packets
@@ -61,7 +63,17 @@ impl SaikaRedPacket for Contract {
                     .unwrap();
                 parse_red_packet_view(red_packet, public_key)
             })
-            .collect()
+            .collect::<Vec<RedPacketView>>();
+        vec.sort_by(|a, b| {
+            let a_create_timestamp = a.create_timestamp;
+            let b_create_timestamp = b.create_timestamp;
+            if a_create_timestamp >= b_create_timestamp {
+                Ordering::Less
+            } else {
+                Ordering::Greater
+            }
+        });
+        vec
     }
     /// view owner's red packet public keys
     fn get_pks_by_owner_id(&self, owner_id: AccountId) -> HashSet<PublicKey> {
