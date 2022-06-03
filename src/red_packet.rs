@@ -16,18 +16,18 @@ pub struct RedPacket {
     pub token: Token,
     pub token_id: Option<AccountId>,
     pub owner_id: AccountId,
-    init_balance: U128,
-    current_balance: U128,
-    refunded_balance: U128,
-    init_split: usize,
-    current_split: usize,
-    split_mod: SplitMod,
-    msg: Option<String>,
-    white_list: Option<HashSet<AccountId>>,
-    claimers: HashMap<AccountId, U128>,
-    failed_claimers: HashMap<AccountId, U128>,
-    create_timestamp: U64,
-    run_out_timestamp: Option<U64>
+    pub init_balance: U128,
+    pub current_balance: U128,
+    pub refunded_balance: U128,
+    pub init_split: usize,
+    pub current_split: usize,
+    pub split_mod: SplitMod,
+    pub msg: Option<String>,
+    pub white_list: Option<HashSet<AccountId>>,
+    pub claimers: HashMap<AccountId, U128>,
+    pub failed_claimers: HashMap<AccountId, U128>,
+    pub create_timestamp: U64,
+    pub run_out_timestamp: Option<U64>
 }
 
 impl RedPacket {

@@ -59,7 +59,7 @@ impl SaikaRedPacket for Contract {
                 let red_packet = self.red_packets
                     .get(&public_key)
                     .unwrap();
-                parse_red_packet_view(&red_packet, &public_key)
+                parse_red_packet_view(red_packet, public_key)
             })
             .collect()
     }
@@ -70,7 +70,7 @@ impl SaikaRedPacket for Contract {
     /// view the red packet detail related to public key
     fn get_red_packet_by_pk(&self, public_key: PublicKey) -> Option<RedPacketView> {
         let red_packet = self.red_packets.get(&public_key)?;
-        Some(parse_red_packet_view(&red_packet, &public_key))
+        Some(parse_red_packet_view(red_packet, public_key))
     }
 }
 
