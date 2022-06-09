@@ -1,4 +1,3 @@
-use std::cmp::Ordering;
 use crate::enums::*;
 use crate::utils::*;
 use crate::dynamic_storage_management::{DynamicStorageBasic, DynamicStorageCore};
@@ -54,7 +53,7 @@ impl SaikaRedPacket for Contract {
     }
     /// view owner's red packets detail
     fn get_red_packets_by_owner_id(&self, owner_id: AccountId) -> Vec<RedPacketView> {
-        let mut vec = self.owners.get(&owner_id)
+        self.owners.get(&owner_id)
             .unwrap_or(HashSet::new())
             .into_iter()
             .map(|public_key|{
@@ -63,17 +62,7 @@ impl SaikaRedPacket for Contract {
                     .unwrap();
                 parse_red_packet_view(red_packet, public_key)
             })
-            .collect::<Vec<RedPacketView>>();
-        vec.sort_by(|a, b| {
-            let a_create_timestamp = a.create_timestamp;
-            let b_create_timestamp = b.create_timestamp;
-            if a_create_timestamp >= b_create_timestamp {
-                Ordering::Less
-            } else {
-                Ordering::Greater
-            }
-        });
-        vec
+            .collect()
     }
     /// view owner's red packet public keys
     fn get_pks_by_owner_id(&self, owner_id: AccountId) -> HashSet<PublicKey> {
