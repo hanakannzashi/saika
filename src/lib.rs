@@ -19,7 +19,7 @@ use crate::enums::StorageKey;
 use crate::red_packet::RedPacket;
 
 use std::collections::HashSet;
-use near_sdk::collections::LookupMap;
+use near_sdk::collections::{UnorderedMap};
 use near_sdk::{AccountId, PublicKey, PanicOnDefault, near_bindgen};
 use near_sdk::borsh::{self, BorshDeserialize,BorshSerialize};
 
@@ -27,10 +27,11 @@ use near_sdk::borsh::{self, BorshDeserialize,BorshSerialize};
 #[near_bindgen]
 #[derive(BorshDeserialize,BorshSerialize,PanicOnDefault)]
 struct Contract {
-    red_packets: LookupMap<PublicKey, RedPacket>,
-    owners: LookupMap<AccountId, HashSet<PublicKey>>,
+    red_packets: UnorderedMap<PublicKey, RedPacket>,
+    owners: UnorderedMap<AccountId, HashSet<PublicKey>>,
     storage_manager: DynamicStorageManager
 }
+
 
 #[near_bindgen]
 impl Contract {
@@ -38,8 +39,8 @@ impl Contract {
     #[private]
     pub fn init() -> Self {
         Self {
-            red_packets: LookupMap::new(StorageKey::RedPackets),
-            owners: LookupMap::new(StorageKey::Owners),
+            red_packets: UnorderedMap::new(StorageKey::RedPackets),
+            owners: UnorderedMap::new(StorageKey::Owners),
             storage_manager: DynamicStorageManager::new(StorageKey::DynamicStorageManager)
         }
     }
