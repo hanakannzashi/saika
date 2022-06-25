@@ -1,10 +1,12 @@
-# saika red packet
+# Saika Red Packet
 
-Support：
+### Red Packet on NEAR
+
+Support Token：
 * NEAR
 * FungibleToken
 
-Mod：
+Red Packet Type：
 * Average
 * Rondom
 
