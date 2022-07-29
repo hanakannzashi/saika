@@ -20,16 +20,24 @@ use crate::red_packet::RedPacket;
 
 use std::collections::HashSet;
 use near_sdk::collections::{UnorderedMap};
-use near_sdk::{AccountId, PublicKey, PanicOnDefault, near_bindgen};
+use near_sdk::{AccountId, PublicKey, PanicOnDefault, near_bindgen, env};
 use near_sdk::borsh::{self, BorshDeserialize,BorshSerialize};
 
+#[near_bindgen]
+#[derive(BorshDeserialize,BorshSerialize,PanicOnDefault)]
+struct OldContract {
+    red_packets: UnorderedMap<PublicKey, RedPacket>,
+    owners: UnorderedMap<AccountId, HashSet<PublicKey>>,
+    storage_manager: DynamicStorageManager
+}
 
 #[near_bindgen]
 #[derive(BorshDeserialize,BorshSerialize,PanicOnDefault)]
 struct Contract {
     red_packets: UnorderedMap<PublicKey, RedPacket>,
     owners: UnorderedMap<AccountId, HashSet<PublicKey>>,
-    storage_manager: DynamicStorageManager
+    storage_manager: DynamicStorageManager,
+    helper_contract_id: AccountId
 }
 
 
@@ -37,11 +45,24 @@ struct Contract {
 impl Contract {
     #[init]
     #[private]
-    pub fn init() -> Self {
+    pub fn init(helper_contract_id: AccountId) -> Self {
         Self {
             red_packets: UnorderedMap::new(StorageKey::RedPackets),
             owners: UnorderedMap::new(StorageKey::Owners),
-            storage_manager: DynamicStorageManager::new(StorageKey::DynamicStorageManager)
+            storage_manager: DynamicStorageManager::new(StorageKey::DynamicStorageManager),
+            helper_contract_id
+        }
+    }
+
+    #[init(ignore_state)]
+    #[private]
+    pub fn upgrade(helper_contract_id: AccountId) -> Self {
+        let contract = env::state_read::<OldContract>().unwrap();
+        Self {
+            red_packets: contract.red_packets,
+            owners: contract.owners,
+            storage_manager: contract.storage_manager,
+            helper_contract_id
         }
     }
 }

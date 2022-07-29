@@ -2,7 +2,7 @@ use crate::enums::SplitMod;
 use crate::red_packet_view::RedPacketView;
 
 use std::collections::HashSet;
-use near_sdk::{AccountId, PublicKey};
+use near_sdk::{AccountId, Promise, PublicKey};
 use near_sdk::json_types::U128;
 
 
@@ -29,4 +29,8 @@ pub trait SaikaRedPacket {
     fn get_pks_by_owner_id(&self, owner_id: AccountId) -> HashSet<PublicKey>;
 
     fn get_red_packet_by_pk(&self, public_key: PublicKey) -> Option<RedPacketView>;
+
+    fn get_key_balance(&self, key: PublicKey) -> U128;
+
+    fn create_account_and_claim(&mut self, new_account_id: AccountId, new_public_key: PublicKey) -> Promise;
 }

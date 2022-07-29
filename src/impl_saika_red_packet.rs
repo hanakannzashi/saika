@@ -7,9 +7,10 @@ use crate::Contract;
 use crate::ContractExt;
 use crate::red_packet_view::{parse_red_packet_view, RedPacketView};
 use crate::saika_red_packet::SaikaRedPacket;
+use crate::cross_other::*;
 
 use std::collections::HashSet;
-use near_sdk::{AccountId, env, near_bindgen, PublicKey, PromiseOrValue, require, Balance};
+use near_sdk::{AccountId, env, near_bindgen, PublicKey, PromiseOrValue, require, Balance, Promise};
 use near_sdk::json_types::{U128};
 
 
@@ -28,16 +29,25 @@ impl SaikaRedPacket for Contract {
         self.internal_create_near_red_packet(
             env::predecessor_account_id(),
             env::attached_deposit(),
-            public_key,
+            public_key.clone(),
             split,
             split_mod,
             msg,
             white_list
         );
+
+        // used for near official linkdrop
+        Promise::new(env::current_account_id())
+            .add_access_key(
+                public_key,
+                250_000_000_000_000_000_000_000,
+                env::current_account_id(),
+                "create_account_and_claim".into()
+            );
     }
     /// claim near red Packet and fungible token red packet with private key
     fn claim_red_packet(&mut self, claimer_id: AccountId) -> U128 {
-        self.internal_claim_red_packet(claimer_id)
+        self.internal_claim_red_packet(claimer_id, false)
     }
     /// refund balance
     fn refund(&mut self, public_key: PublicKey) -> U128 {
@@ -72,6 +82,25 @@ impl SaikaRedPacket for Contract {
     fn get_red_packet_by_pk(&self, public_key: PublicKey) -> Option<RedPacketView> {
         let red_packet = self.red_packets.get(&public_key)?;
         Some(parse_red_packet_view(red_packet, public_key))
+    }
+
+    /// used for near official linkdrop
+    fn get_key_balance(&self, key: PublicKey) -> U128 {
+        let red_packet = self.red_packets
+            .get(&key)
+            .expect(ERR_01_NO_MATCHING_RED_PACKET);
+        match red_packet.token {
+            Token::NEAR => red_packet.current_balance.into(),
+            Token::FungibleToken => unimplemented!("This method only support native NEAR")
+        }
+    }
+
+    /// used for near official linkdrop
+    fn create_account_and_claim(&mut self, new_account_id: AccountId, new_public_key: PublicKey) -> Promise {
+        let claim_amount = self.internal_claim_red_packet(new_account_id.clone(), true);
+        ext_helper::ext(self.helper_contract_id.clone())
+            .with_attached_deposit(claim_amount.0)
+            .create_account(new_account_id, new_public_key)
     }
 }
 
@@ -140,7 +169,7 @@ impl Contract {
         PromiseOrValue::Value(U128(0))
     }
 
-    pub fn internal_claim_red_packet(&mut self, claimer_id: AccountId) -> U128 {
+    pub fn internal_claim_red_packet(&mut self, claimer_id: AccountId, create:bool) -> U128 {
         let public_key = env::signer_account_pk();
         let mut red_packet = self.red_packets
             .get(&public_key)
@@ -154,7 +183,12 @@ impl Contract {
         if claim_amount.0 != 0 {
             match red_packet.token {
                 Token::NEAR => {
-                    transfer(claimer_id, claim_amount.0);
+                    if create {
+                        // create new account
+                        // not implemented in this method
+                    } else {
+                        transfer(claimer_id, claim_amount.0);
+                    }
                 },
                 Token::FungibleToken => {
                     transfer_ft_with_resolve_claim_fungible_token_red_packet(
