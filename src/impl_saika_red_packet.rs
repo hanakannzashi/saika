@@ -89,8 +89,11 @@ impl SaikaRedPacket for Contract {
         let red_packet = self.red_packets
             .get(&key)
             .expect(ERR_01_NO_MATCHING_RED_PACKET);
+        if red_packet.current_balance.0 == 0 {
+            panic!("Red Packet is run out");
+        }
         match red_packet.token {
-            Token::NEAR => red_packet.current_balance.into(),
+            Token::NEAR => red_packet.current_balance,
             Token::FungibleToken => unimplemented!("This method only support native NEAR")
         }
     }
@@ -98,6 +101,9 @@ impl SaikaRedPacket for Contract {
     /// used for near official linkdrop
     fn create_account_and_claim(&mut self, new_account_id: AccountId, new_public_key: PublicKey) -> Promise {
         let claim_amount = self.internal_claim_red_packet(new_account_id.clone(), true);
+        if claim_amount.0 == 0 {
+            panic!("Red Packet is run out");
+        }
         ext_helper::ext(self.helper_contract_id.clone())
             .with_attached_deposit(claim_amount.0)
             .create_account(new_account_id, new_public_key)
