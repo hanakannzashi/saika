@@ -10,6 +10,7 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::Serialize;
 
 
+
 #[derive(BorshDeserialize,BorshSerialize,Serialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct RedPacket {
@@ -101,7 +102,7 @@ impl RedPacket {
         true
     }
 
-    pub fn virtual_claim(&mut self, claimer_id: AccountId) -> Result<U128, &'static str> {
+    pub fn virtual_claim(&mut self, claimer_id: AccountId, min_sub: Option<u128>) -> Result<U128, &'static str> {
         if self.is_run_out() {
             return Ok(U128(0));
         };
@@ -131,7 +132,7 @@ impl RedPacket {
                 claim_amount = random_sub(
                     self.current_balance.0,
                     self.current_split,
-                    None
+                    min_sub
                 );
             }
         };
@@ -173,5 +174,3 @@ impl RedPacket {
         self.refunded_balance.0 += failed_amount.0;
     }
 }
-
-

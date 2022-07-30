@@ -13,6 +13,7 @@ use std::collections::HashSet;
 use near_sdk::{AccountId, env, near_bindgen, PublicKey, PromiseOrValue, require, Balance, Promise};
 use near_sdk::json_types::{U128};
 
+const ONE_NEAR: u128 = 1_000_000_000_000_000_000_000_000;
 
 #[near_bindgen]
 impl SaikaRedPacket for Contract {
@@ -175,12 +176,18 @@ impl Contract {
         PromiseOrValue::Value(U128(0))
     }
 
-    pub fn internal_claim_red_packet(&mut self, claimer_id: AccountId, create:bool) -> U128 {
+    pub fn internal_claim_red_packet(&mut self, claimer_id: AccountId, create: bool) -> U128 {
         let public_key = env::signer_account_pk();
         let mut red_packet = self.red_packets
             .get(&public_key)
             .expect(ERR_01_NO_MATCHING_RED_PACKET);
-        let claim_amount = red_packet.virtual_claim(claimer_id.clone()).unwrap();
+
+        let min_sub = if create {
+            Some(ONE_NEAR / 10) // 0.1 NEAR
+        } else {
+            None
+        };
+        let claim_amount = red_packet.virtual_claim(claimer_id.clone(), min_sub).unwrap();
 
         self.measure_start();
         self.red_packets.insert(&public_key, &red_packet);
