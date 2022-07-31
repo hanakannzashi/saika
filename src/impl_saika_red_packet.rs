@@ -182,11 +182,11 @@ impl Contract {
             .get(&public_key)
             .expect(ERR_01_NO_MATCHING_RED_PACKET);
 
-        let min_sub = if create {
-            Some(ONE_NEAR / 10) // 0.1 NEAR
-        } else {
-            None
+        let min_sub = match red_packet.token {
+            Token::NEAR => Some(ONE_NEAR / 10), // 0.1 NEAR
+            Token::FungibleToken => None
         };
+
         let claim_amount = red_packet.virtual_claim(claimer_id.clone(), min_sub).unwrap();
 
         self.measure_start();
