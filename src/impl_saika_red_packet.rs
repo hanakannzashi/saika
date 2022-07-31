@@ -204,13 +204,17 @@ impl Contract {
                     }
                 },
                 Token::FungibleToken => {
-                    transfer_ft_with_resolve_claim_fungible_token_red_packet(
-                        claimer_id,
-                        claim_amount,
-                        red_packet.token_id.clone().unwrap(),
-                        red_packet.owner_id,
-                        public_key
-                    );
+                    if create {
+                        panic!("Fungible Token can not be used to create account")
+                    } else {
+                        transfer_ft_with_resolve_claim_fungible_token_red_packet(
+                            claimer_id,
+                            claim_amount,
+                            red_packet.token_id.clone().unwrap(),
+                            red_packet.owner_id,
+                            public_key
+                        );
+                    }
                 }
             };
         };
